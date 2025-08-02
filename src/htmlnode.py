@@ -31,3 +31,17 @@ class LeafNode(HTMLNode):
         props_string = self.props_to_html()
         return f"<{self.tag}{props_string}>{self.value}</{self.tag}>"
 
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag == None:
+            raise ValueError("Error: Missing Tag Argument")
+        if self.children == None:
+            raise ValueError("Error: Missing Value Argument")
+        child_html=""
+        for child in self.children:
+            child_html += child.to_html()
+        props_string = self.props_to_html()
+        return f"<{self.tag}{props_string}>{child_html}</{self.tag}>"
