@@ -238,3 +238,6 @@ class TestInlineMarkdown(unittest.TestCase):
         ]
 
         self.assertListEqual(expected, result)
+
+if __name__ == "__main__":
+    unittest.main()
