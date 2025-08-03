@@ -1,6 +1,6 @@
 import unittest
 
-from inline_markdown import split_nodes_delimiter
+from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 from textnode import TextNode, TextType
 
 class TestInlineMarkdown(unittest.TestCase):
@@ -74,3 +74,44 @@ class TestInlineMarkdown(unittest.TestCase):
             split_nodes_delimiter([node], "**", TextType.BOLD)
 
 
+    def test_extract_markdown_images(self):
+        result = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        expected = [("image", "https://i.imgur.com/zjjcJKZ.png")]
+        self.assertListEqual(expected, result)
+
+    def test_extract_markdown_images_multiple(self):
+        result = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and ![dance](https://imgur.com/1Ccjp)"
+        )
+        expected = [("image", "https://i.imgur.com/zjjcJKZ.png"),("dance", "https://imgur.com/1Ccjp")]
+        self.assertListEqual(expected, result)
+
+    def test_extract_markdown_link(self):
+        result = extract_markdown_links(
+            "This is text with a link [to boot dev](https://www.boot.dev)"
+        )
+        expected = [("to boot dev", "https://www.boot.dev")]
+        self.assertListEqual(expected, result)
+
+    def test_extract_markdown_links_multiple(self):
+        result = extract_markdown_links(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        expected = [("to boot dev", "https://www.boot.dev"),("to youtube", "https://www.youtube.com/@bootdotdev")]
+        self.assertListEqual(expected, result)
+
+    def test_extract_markdown_links_nothing(self):
+        result = extract_markdown_links(
+            "This is text without a link"
+        )
+        expected = []
+        self.assertListEqual(expected, result)
+
+    def test_extract_markdown_images_nothing(self):
+        result = extract_markdown_images(
+            "This is text without an image"
+        )
+        expected = []
+        self.assertListEqual(expected, result)
