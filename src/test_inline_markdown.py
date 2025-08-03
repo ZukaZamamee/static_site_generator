@@ -1,6 +1,6 @@
 import unittest
 
-from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_link, split_nodes_image
 from textnode import TextNode, TextType
 
 class TestInlineMarkdown(unittest.TestCase):
@@ -114,4 +114,79 @@ class TestInlineMarkdown(unittest.TestCase):
             "This is text without an image"
         )
         expected = []
+        self.assertListEqual(expected, result)
+
+    def test_split_images(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        result = split_nodes_image([node])
+        expected = [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"),
+            ]
+        self.assertListEqual(expected, result)
+
+    def test_split_links(self):
+        node = TextNode(
+            "This is text with an [google](www.google.com) and another [frontpage of the internet](www.reddit.com/r/all)",
+            TextType.TEXT,
+        )
+        result = split_nodes_link([node])
+        expected = [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("google", TextType.LINK, "www.google.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("frontpage of the internet", TextType.LINK, "www.reddit.com/r/all"),
+            ]
+        self.assertListEqual(expected, result)
+
+    def test_split_links_and_images(self):
+        node = TextNode(
+            "This is text with a link [google](www.google.com) and an image ![image](https://i.imgur.com/zjjcJKZ.png)",
+            TextType.TEXT,
+        )
+        result = split_nodes_link([node])
+        result = split_nodes_image(result)
+        expected = [
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("google", TextType.LINK, "www.google.com"),
+                TextNode(" and an image ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            ]
+        self.assertListEqual(expected, result)
+
+    def test_split_multi_links_and_images(self):
+        node = TextNode(
+            "This is text with a link [google](www.google.com) and an image ![image](https://i.imgur.com/zjjcJKZ.png) "
+            "and another link [frontpage of the internet](www.reddit.com/r/all) and another image ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        result = split_nodes_link([node])
+        result = split_nodes_image(result)
+        expected = [
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("google", TextType.LINK, "www.google.com"),
+                TextNode(" and an image ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another link ", TextType.TEXT),
+                TextNode("frontpage of the internet", TextType.LINK, "www.reddit.com/r/all"),
+                TextNode(" and another image ", TextType.TEXT),
+                TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png")
+            ]
+        self.assertListEqual(expected, result)
+
+    def test_split_no_links_and_images(self):
+        node = TextNode(
+            "This is text with no links or images.",
+            TextType.TEXT,
+        )
+        result = split_nodes_link([node])
+        result = split_nodes_image(result)
+        expected = [
+                TextNode("This is text with no links or images.", TextType.TEXT),
+            ]
         self.assertListEqual(expected, result)
