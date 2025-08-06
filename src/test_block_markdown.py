@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown import BlockType, markdown_to_blocks, block_to_block_type, markdown_to_html_node
+from block_markdown import BlockType, markdown_to_blocks, block_to_block_type, markdown_to_html_node, extract_title
 
 class TestBlockMarkdown(unittest.TestCase):
 
@@ -256,6 +256,19 @@ This is the same paragraph on a new line
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+    def test_extract_title_heading(self):
+        md = "# Heading 1"
+        result = extract_title(md)
+        expected = "Heading 1"
+
+        self.assertEqual(result, expected)
+
+    def test_extract_title_no_heading(self):
+        md = "Heading 1"
+
+        with self.assertRaises(ValueError):
+            extract_title(md)
 
 if __name__ == "__main__":
     unittest.main()
